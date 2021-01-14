@@ -75,7 +75,7 @@ def upload_func(blob, chunkdata, rel_path, file_progress):
                             timeout=tranport_timeout,
                             checksum="md5"
                             )
-    timespent = int((time.time() - timestart) * 10) / 10
+    timespent = int((time.time() - timestart) * 1000) / 1000
     pload_bytes = len(chunkdata)
     speed = size_to_str(int(pload_bytes / timespent)) + "/s"
     logger.info(
@@ -352,7 +352,7 @@ def download_func(blob, file_start, file_end, rel_path, file_progress):
     response = blob.download_as_bytes(
         start=file_start, end=file_end,
         raw_download=True, timeout=tranport_timeout, checksum=None)  # TODO: Check local crc32 with remote object
-    timespent = int((time.time() - timestart) * 10) / 10
+    timespent = int((time.time() - timestart) * 1000) / 1000
     pload_bytes = len(response)
     speed = size_to_str(int(pload_bytes / timespent)) + "/s"
     logger.info(
