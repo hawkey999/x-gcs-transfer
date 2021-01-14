@@ -1,42 +1,41 @@
-# Google Cloud Storage strong upload/download
-Google Cloud Storage 大文件上传下载或恶劣网络传输场景
+# GCS Strong Upload/Download
+Google Cloud Storage Upload/Download, fully usage of network bandwidth, suitable for big file or poor network senario.  
+谷歌云存储GCS大文件上传下载，充分利用网络带宽，适合大文件或恶劣网络传输场景。  
 
-## 使用说明
-1. 认证（三选一）
- - 如果运行在GCE，则配置IAM Service Account给GCE，并且GCE的访问API权限至少要有Storage和oauth两个API权限（可以全打开，只由IAM控制）
- - 在本地电脑运行，并曾经配置过gcloud命令行，并进行了初始化和认证，可以运行gsutil的环境  
- - 通用方式。在IAM Service Account下载Json Key，并配置环境变量指向这个Key文件  
+Performance 性能测试:  
+* 
+
+
+## How to Run
+1. Authentication (Choose one of these three)  认证（三选一）
+ - Running on GCE(VM): Config IAM Service Account for GCE. GCE API access scope should have at least Storage and oauth API. You can allow all API access scope and only control auth by IAM.  
+ 如果运行在GCE虚拟机: 则配置IAM Service Account给GCE，并且GCE的访问API权限至少要有Storage和oauth两个API权限（可以全打开，只由IAM控制）
+   
+ - Running on local PC, you have configured gcloud command line tool, have init the gcloud and authoried . The PC can run gstuil.  
+ 在本地电脑运行，并曾经配置过gcloud命令行，并进行了初始化和认证，可以运行gsutil的环境  
+   
+ - General way: Download Json key of IAM Service Account, and config OS Environment point to the key file  
+ 通用方式: 在IAM Service Account下载Json Key，并配置环境变量指向这个Key文件  
+ Document 文档: https://cloud.google.com/docs/authentication/production
+```
     export GOOGLE_APPLICATION_CREDENTIALS="/home/user/Downloads/my-key.json"  
-    参见：https://cloud.google.com/docs/authentication/production
+```
+    
 
 2. 安装依赖包  
 ```
 pip3 install -r requirements.txt
 ```
 
-3. 简单运行  
+3. Simple Run Example  
 ```
 python3 gcs-xfile-transfer.py \
 --job_type download \
---local_dir "/home/my_user/download/" \
---bucket my_bucket_name
-```
-高级选项  
-```
-python3 gcs-xfile-transfer.py \
---job_type download \
---local_dir "/home/my_user/download/" \
---bucket my_bucket_name \
---prefix "prefix_in_the_bucket" \
---temp_prefix x-gcs-temp \
---max_concurrent_files 3 \
---max_concurrent_threads_per_file 5 \
---conn_timeout 3 \
---read_timeout 30 \
---max_retry 300
+--local_dir "my/local/dir/" \
+--bucket my_gcs_bucket_name \
 ```
 
-下载示例：
+Example Download command 下载示例：  
 ```
 python3 gcs-xfile-transfer.py \
 --job_type download \
@@ -44,12 +43,113 @@ python3 gcs-xfile-transfer.py \
 --bucket lab-hzb-us-central1 \
 --prefix "x-gcs-upload/"
 ```
-上传示例：
+Example Upload example command 上传示例：  
+```
+python3 gcs-xfile-transfer.py \
+--job_type upload \
+--local_dir "/Users/hzb/Downloads/test_folder" \
+--bucket lab-hzb-us-central1 
+```
+Example Download with custom concurrent and chunksize 下载并自定义并发数和Chunksize：  
 ```
 python3 gcs-xfile-transfer.py \
 --job_type upload \
 --local_dir "/Users/hzb/Downloads/test_folder" \
 --bucket lab-hzb-us-central1 \
---conn_timeout 5 \
---read_timeout 60
+--prefix "x-gcs-upload/" \
+--max_concurrent_files 3 \
+--max_concurrent_threads_per_file 10 \
+--chunksize 20
+```
+
+4. Advanced parameters  高级选项  
+
+--job_type  
+Required: download | upload  
+
+--local_dir  
+Required: Local disk directory  
+
+--bucket  
+Required: GCS bucket name  
+
+--prefix  
+Optional: prefix in the the GCS bucket.  
+Default: "/"  
+
+--temp_prefix  
+Optional. the temp prefix in the bucket for temp chunk files, temp files will be delete after upload and compose complete.  
+Default: "x-gcs-temp"  
+
+--max_concurrent_files  
+Optional. Concurrent files transfering.  
+ Default: 3  
+
+--max_concurrent_threads_per_file  
+Optional. Concurrent threads for each file.  
+Default: 5  
+
+--conn_timeout  
+Optional. TCP connect setup timeout.  
+Default: 5  
+
+--read_timeout  
+Optional. Response from server timeout, i.e. chunk transfer time.  
+Default: 60  
+
+--max_retry 
+Optional. Retries on single request of upload/download.  
+Default: 300  
+
+--chunksize  
+Optional. Chunk size, INT, Unit MB.  
+Default: 5
+
+## Notice:
+* 注意并发数不是越多越好，因为网络上会对TCP链接时间长的连接进行降速，所以并发过多反而会慢。  
+* max_concurrent_files x max_concurrent_threads_per_file x Chunksize 是传输过程中需要占用的临时内存数，注意服务器的内存配置。  
+* 网络质量差的时候Chunsize可以设置小一点，例如默认的5MB，timeout可以设置得长一些，例如(5, 60)  
+* 网络较好可以设置Chunksize大一些，例如10MB或者50MB,，timeout可以设置得短一些，例如(3, 10)  
+
+## 实现中国大陆较稳定地网络访问GCS
+### 说明
+国内访问GCS如果搭建Proxy的方式来大量传输数据并不稳定，带宽上不去。
+1. 实际上国内访问storage.googleapis.com是通的，可以通过一个HK的服务器 nslookup 可以找到一些GCS的HK IP地址，丢包率相对低些。实际上，有一个GCS地址通就行，跟bucket在哪里是没关系的。  
+2. 访问GCS还必须通过认证地址 oauth2.googleapis.com，这个在大陆是不通的，需要搭建一个Nginx 做TCP 443转发oauth2 api。
+3. 在本地服务器host上设置两条记录 
+```
+sudo vi /etc/hosts
+    <Specified_GCS_IP> storage.googleapis.com
+    <mynginx_IP> oauth2.googleapis.com
+```
+
+### Nginx 安装 (debian为例)
+1. 执行
+```
+sudo apt install nginx -y
+mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
+sudo vim /etc/nginx/nginx.conf
+```
+2. 拷贝以下配置nginx.conf，并保存退出
+```
+load_module /usr/lib/nginx/modules/ngx_stream_module.so;
+events {
+        worker_connections 768;
+        # multi_accept on;
+}
+stream {
+    server {
+        listen 443;
+        proxy_pass oauth2.googleapis.com:443;
+    }
+}
+```
+3. 重新加载Nginx配置
+```
+sudo systemctl reload nginx
+```
+4. 检查Nginx状态
+```
+sudo systemctl status nginx
+netstat -ntulp |grep 443
 ```
