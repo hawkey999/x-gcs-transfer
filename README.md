@@ -29,7 +29,7 @@ pip3 install -r requirements.txt
 
 3. Simple Run Example  
 ```
-python3 gcs-xfile-transfer.py \
+python3 x-gcs-transfer.py \
 --job_type download \
 --local_dir "my/local/dir/" \
 --bucket my_gcs_bucket_name \
@@ -37,7 +37,7 @@ python3 gcs-xfile-transfer.py \
 
 Example Download command 下载示例：  
 ```
-python3 gcs-xfile-transfer.py \
+python3 x-gcs-transfer.py \
 --job_type download \
 --local_dir "/Users/hzb/Downloads/test_folder" \
 --bucket lab-hzb-us-central1 \
@@ -45,14 +45,14 @@ python3 gcs-xfile-transfer.py \
 ```
 Example Upload example command 上传示例：  
 ```
-python3 gcs-xfile-transfer.py \
+python3 x-gcs-transfer.py \
 --job_type upload \
 --local_dir "/Users/hzb/Downloads/test_folder" \
 --bucket lab-hzb-us-central1 
 ```
 Example Download with custom concurrent and chunksize 下载并自定义并发数和Chunksize：  
 ```
-python3 gcs-xfile-transfer.py \
+python3 x-gcs-transfer.py \
 --job_type upload \
 --local_dir "/Users/hzb/Downloads/test_folder" \
 --bucket lab-hzb-us-central1 \
