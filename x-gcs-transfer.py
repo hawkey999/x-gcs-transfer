@@ -26,6 +26,7 @@ parser.add_argument("--max_concurrent_threads_per_file", type=int, default=5)
 parser.add_argument("--conn_timeout", type=int, default=5)
 parser.add_argument("--read_timeout", type=int, default=60)
 parser.add_argument("--max_retry", type=int, default=300)
+parser.add_argument("--chunksize", type=int, default=5)
 
 args = parser.parse_args()
 bucket_name = args.bucket
@@ -35,7 +36,7 @@ local_dir = args.local_dir
 job_type = args.job_type.lower()
 MB = 1024*1024
 min_split_size = 10*MB  # If file size less than this, then use original google lib to upload
-chunksize = 5*MB  # Set default chunksize
+chunksize = args.chunksize*MB  # Set default chunksize
 MaxThread = args.max_concurrent_threads_per_file  # Concurrent loading threads for each file.
 MaxFile = args.max_concurrent_files
 # Concurrent loading files. Threads x Files x chunksize should be less than available memory
