@@ -31,6 +31,8 @@ parser.add_argument("--chunksize", type=int, default=5)
 args = parser.parse_args()
 bucket_name = args.bucket
 bucket_prefix = PurePosixPath(args.prefix)
+if args.prefix == "/" or args.prefix == ".":
+    bucket_prefix = PurePosixPath("")
 temp_path = bucket_prefix / args.temp_prefix
 local_dir = args.local_dir
 job_type = args.job_type.lower()
@@ -53,6 +55,7 @@ streamHandler = logging.StreamHandler()
 streamHandler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s - %(message)s'))
 logger.addHandler(streamHandler)
 logger.setLevel(logging.INFO)
+# TODO: export log to file
 
 
 def split(file_size, c_size):
@@ -68,7 +71,7 @@ def split(file_size, c_size):
        before_sleep=before_sleep_log(logger, logging.WARN))
 def upload_func(blob, chunkdata, rel_path, file_progress):
     # logger.info(f"-Start upload Chunk:{loaded_name} ")
-    content_type = mimetypes.guess_type(rel_path)[0]
+    content_type = mimetypes.guess_type(os.path.basename(rel_path))[0]
     timestart = time.time()
     blob.upload_from_string(chunkdata,
                             content_type=content_type,
@@ -176,7 +179,7 @@ def upload_file(upload_job):
     index_list = split(file_size, chunksize)
     chunk_list = []
     # Get file chunk list exist on bucket tmp
-    c_object_list = list_bucket(prefix=f"{str(temp_path / rel_path)}.x-tmp-", no_size=True)
+    c_object_list = list_bucket(prefix=f"{str(temp_path / rel_path)}.x-tmp-", only_list_file=True)
 
     with futures.ThreadPoolExecutor(max_workers=MaxThread) as pool:
         for file_start in index_list:
@@ -209,16 +212,22 @@ def list_local(path):
     return file_list
 
 
-def list_bucket(prefix, no_size=False):
+def list_bucket(prefix, only_list_file=False):
     object_list = []
 
-    blobs = storage_client.list_blobs(bucket_name, prefix=prefix, timeout=tranport_timeout, retry=g_retry)
+    if prefix != ".":
+        blobs = storage_client.list_blobs(bucket_name, prefix=prefix, timeout=tranport_timeout, retry=g_retry)
+    else:  # If no prefix (i.e. prefix=".") then cannot add prefix "" in the request
+        blobs = storage_client.list_blobs(bucket_name, timeout=tranport_timeout, retry=g_retry)
     for page in blobs.pages:
         for blob in page:
             absPath = blob.name
             size = blob.size
-            relPath = absPath[len(prefix) + 1:]
-            if no_size:
+            if prefix != ".":
+                relPath = absPath[len(prefix) + 1:]
+            else:
+                relPath = absPath
+            if only_list_file:
                 object_list.append(absPath)
             else:
                 object_list.append({
@@ -417,7 +426,7 @@ if __name__ == '__main__':
                 pool.submit(download_file, job)
 
     time_str = str(datetime.datetime.now() - start_time)
-    logger.info(f"Mission completed. Time:{time_str}. "
+    logger.info(f"All files completed. Time:{time_str}. "
                 f"Comparing {local_dir} and {bucket_name}/{bucket_prefix}, job_type {job_type}")
     # Compare list again
     if job_type == "upload":

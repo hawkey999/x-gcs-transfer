@@ -106,10 +106,10 @@ Optional. Chunk size, INT, Unit MB.
 Default: 5
 
 ## Notice:
-* 注意并发数不是越多越好，因为网络上会对TCP链接时间长的连接进行降速，所以并发过多反而会慢。  
+* 注意并发数不是越多越好，因为网络上会对TCP链接时间长的连接进行降速，所以并发过多反而会慢，总线程数在15比较合适。另外受限与google-cloud-storage Python library 的限制，目前不能自定义connection pool大小。    
 * max_concurrent_files x max_concurrent_threads_per_file x Chunksize 是传输过程中需要占用的临时内存数，注意服务器的内存配置。  
 * 网络质量差的时候Chunsize可以设置小一点，例如默认的5MB，timeout可以设置得长一些，例如(5, 60)  
-* 网络较好可以设置Chunksize大一些，例如10MB或者50MB,，timeout可以设置得短一些，例如(3, 10)  
+* 网络较好可以设置Chunksize大一些，例如10MB或者20MB,，timeout可以设置得短一些，例如(3, 10)  
 
 ## 实现中国大陆较稳定地网络访问GCS
 ### 说明
