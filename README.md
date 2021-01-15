@@ -2,7 +2,7 @@
 Google Cloud Storage Upload/Download, fully usage of network bandwidth, suitable for big file or poor network senario.  
 谷歌云存储GCS大文件上传下载，充分利用网络带宽，适合大文件或恶劣网络传输场景。  
 
-Performance 性能测试:  
+## Performance 性能测试:  
 * **Single 100GB Big File 单个大文件100GB**  
 **Upload 720MB/s SUSTAINABLE HIGH SPEED** (Read from Local SSD) as below graph. In similar test download 120MB/s(Write Local SSD).   
 上传达到了 **720MBytes/s** 稳定速度，达到了Local SSD读取速度的瓶颈。类似的下载测试达到120MB/s。  
@@ -33,12 +33,15 @@ Running on GCE N2-8cpu with one Local SSD 375G. This speed has reach the cap spe
 ```
     
 
-2. 安装依赖包  
+2. 安装  
+* Install Python >= version 3.7
+
+* Install library  
 ```
 pip3 install -r requirements.txt
 ```
 
-3. Simple Run Example  
+3. Simple Download Example  
 ```
 python3 x-gcs-transfer.py \
 --job_type download \
@@ -71,6 +74,24 @@ python3 x-gcs-transfer.py \
 --max_concurrent_files 3 \
 --max_concurrent_threads_per_file 10 \
 --chunksize 20
+```
+Example Upload one file example command 上传单个文件示例：  
+```
+python3 x-gcs-transfer.py \
+--job_type upload \
+--local_dir "/Users/hzb/Downloads/test_folder/sing.zip" \
+--bucket lab-hzb-us-central1 \
+--prefix "smfile" \
+--single_file true
+```
+Example Download one file example command 下载单个文件示例：  
+```
+python3 x-gcs-transfer.py \
+--job_type download \
+--local_dir "/Users/hzb/Downloads/test_folder/" \
+--bucket lab-hzb-us-central1 \
+--prefix "smfile/sing.zip" \
+--single_file true
 ```
 
 4. Advanced parameters  高级选项  
@@ -110,7 +131,7 @@ Default: 5
 
 --read_timeout  
 Optional. Response from server timeout, i.e. chunk transfer time.  
-Default: 60  
+Default: 30  
 
 --max_retry 
 Optional. Retries on single request of upload/download.  
@@ -121,10 +142,9 @@ Optional. Chunk size, INT, Unit MB.
 Default: 5
 
 ## Notice:
-* 注意并发数不是越多越好，因为网络上会对TCP链接时间长的连接进行降速，所以并发过多反而会慢，总线程数在15比较合适。另外受限与google-cloud-storage Python library 的限制，目前不能自定义connection pool大小。    
-* max_concurrent_files x max_concurrent_threads_per_file x Chunksize 是传输过程中需要占用的临时内存数，注意服务器的内存配置。  
-* 网络质量差的时候Chunsize可以设置小一点，例如默认的5MB，timeout可以设置得长一些，例如(5, 60)  
-* 网络较好可以设置Chunksize大一些，例如10MB或者20MB,，timeout可以设置得短一些，例如(3, 10)  
+* 并发数：注意并发数不是越多越好，因为网络上会对TCP链接时间长的降速，所以并发过多反而会更慢，总线程数在15比较合适。另外受限于 google-cloud-storage Python library 的限制，目前不能自定义connection pool大小。    
+* 服务器内存：max_concurrent_files x max_concurrent_threads_per_file x Chunksize 是传输过程中需要占用的临时内存数，注意服务器的内存配置。  
+* 超时设置（conn_timeout, read_timeout）：网络质量差的时候Chunsize可以设置小一点，例如默认的5MB，timeout可以设置得长一些，例如(6, 60)。网络较好可以设置Chunksize大一些，例如10MB或者20MB，timeout可以设置得短一些，例如(3, 10)  
 
 ## 实现中国大陆较稳定地网络访问GCS
 ### 说明

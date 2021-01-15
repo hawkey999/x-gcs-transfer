@@ -25,7 +25,7 @@ parser.add_argument("--temp_prefix", type=str, default="x-gcs-temp")
 parser.add_argument("--max_concurrent_files", type=int, default=3)
 parser.add_argument("--max_concurrent_threads_per_file", type=int, default=5)
 parser.add_argument("--conn_timeout", type=int, default=5)
-parser.add_argument("--read_timeout", type=int, default=60)
+parser.add_argument("--read_timeout", type=int, default=30)
 parser.add_argument("--max_retry", type=int, default=300)
 parser.add_argument("--chunksize", type=int, default=5)
 
