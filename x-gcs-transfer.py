@@ -20,6 +20,7 @@ parser.add_argument("--job_type", type=str)
 parser.add_argument("--local_dir", type=str)
 parser.add_argument("--bucket", type=str)
 parser.add_argument("--prefix", type=str, default="")
+parser.add_argument("--single_file", type=str, default="false")
 parser.add_argument("--temp_prefix", type=str, default="x-gcs-temp")
 parser.add_argument("--max_concurrent_files", type=int, default=3)
 parser.add_argument("--max_concurrent_threads_per_file", type=int, default=5)
@@ -33,6 +34,7 @@ bucket_name = args.bucket
 bucket_prefix = PurePosixPath(args.prefix)
 if args.prefix == "/" or args.prefix == ".":
     bucket_prefix = PurePosixPath("")
+single_file = args.single_file.lower() == "true"
 temp_path = bucket_prefix / args.temp_prefix
 local_dir = args.local_dir
 job_type = args.job_type.lower()
@@ -103,7 +105,10 @@ def size_to_str(size):
 
 
 def upload_chunk(rel_path, file_start, file_end, chunk_path, file_progress):
-    abs_path = str(Path(local_dir) / rel_path)
+    if single_file:
+        abs_path = local_dir
+    else:
+        abs_path = str(Path(local_dir) / rel_path)
     try:
         blob = bucket.blob(chunk_path)
         # if blob.exists():
@@ -133,7 +138,10 @@ def compose(name_list, rel_path):
         if len(com_list) == com_size or b == name_list[-1]:
             
             if b == name_list[-1]:
-                com_name = str(bucket_prefix / rel_path)
+                if single_file:
+                    com_name = rel_path
+                else:
+                    com_name = str(bucket_prefix / rel_path)
             else:
                 com_name = f"{str(temp_path / rel_path)}.x-com-{com_number}"
                 com_number += 1
@@ -165,7 +173,10 @@ def upload_small(local_path, rel_path):
 
 def upload_file(upload_job):
     rel_path = upload_job["File_relPath"]
-    abs_path = Path(local_dir)/rel_path
+    if single_file:
+        abs_path = local_dir
+    else:
+        abs_path = Path(local_dir)/rel_path
     file_size = upload_job["Size"]
     if file_size < min_split_size:
         try:
@@ -198,16 +209,25 @@ def upload_file(upload_job):
 
 
 def list_local(path):
-    file_list = []
-    for parent, dirnames, filenames in os.walk(path):
-        for filename in filenames:
-            file_absPath = os.path.join(parent, filename)
-            file_relativePath = file_absPath[len(path) + 1:]
-            file_size = os.path.getsize(file_absPath)
-            file_list.append({
-                "File_relPath": file_relativePath,
-                "Size": file_size
-            })
+    path = str(Path(path))
+    if single_file and job_type == "upload":
+        file_size = os.path.getsize(path)
+        file_list = [{
+            "File_relPath": os.path.basename(path),
+            "Size": file_size
+        }]
+        return file_list
+    else:
+        file_list = []
+        for parent, dirnames, filenames in os.walk(path):
+            for filename in filenames:
+                file_absPath = os.path.join(parent, filename)
+                file_relativePath = file_absPath[len(path) + 1:]
+                file_size = os.path.getsize(file_absPath)
+                file_list.append({
+                    "File_relPath": file_relativePath,
+                    "Size": file_size
+                })
     return file_list
 
 
@@ -222,7 +242,7 @@ def list_bucket(prefix, only_list_file=False):
         for blob in page:
             absPath = blob.name
             size = blob.size
-            if prefix != "." and prefix != absPath:
+            if prefix != "." and not single_file:
                 relPath = absPath[len(prefix) + 1:]
             else:
                 relPath = absPath
@@ -241,7 +261,10 @@ def compare_upload(path, prefix_str):
     logger.info(f"Listing gs://{PurePosixPath(bucket_name) / prefix_str}")
     bucket_obj_list = list_bucket(prefix_str)
     delta_list = []
+
     for i in local_list:
+        if single_file:
+            i["File_relPath"] = str(PurePosixPath(prefix_str) / i["File_relPath"])
         if i not in bucket_obj_list:
             delta_list.append(i)
     return delta_list
@@ -371,7 +394,10 @@ def download_func(blob, file_start, file_end, rel_path, file_progress):
 def download_chunk(file_start, file_end, rel_path, wfile, file_progress):
     abs_path = Path(local_dir) / rel_path
     try:
-        blob = bucket.blob(str(bucket_prefix/rel_path))
+        if not single_file:
+            blob = bucket.blob(str(bucket_prefix/rel_path))
+        else:
+            blob = bucket.blob(str(rel_path))
         chunkdata = download_func(blob, file_start, file_end, rel_path, file_progress)
         wfile.seek(file_start)
         wfile.write(chunkdata)
@@ -404,7 +430,7 @@ def create_db():
 
 if __name__ == '__main__':
     start_time = datetime.datetime.now()
-    logger.info(f"Comparing {local_dir} and {bucket_name}/{bucket_prefix}, job_type {job_type}")
+    logger.info(f"Comparing {local_dir} and gs://{bucket_name}/{bucket_prefix}, Job_type: {job_type}")
     if job_type == "upload":
         job_list = compare_upload(local_dir, str(bucket_prefix))
     elif job_type == "download":
