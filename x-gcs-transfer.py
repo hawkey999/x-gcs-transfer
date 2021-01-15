@@ -157,7 +157,7 @@ def compose(name_list, rel_path):
     # Delete the delete_list
     for blob in del_list:
         blob.delete()
-    logger.info(f"-Complete compose! File: {rel_path}")
+    logger.info(f"-Complete upload compose! File: {rel_path}")
     return
 
 
@@ -372,7 +372,7 @@ def download_file(download_job):
             db.commit()
     except Exception as e:
         logger.error(f"Fail to delete chunk index from sqlite3 DB. {e}")
-    logger.info(f"-Complete compose! File {rel_path}")
+    logger.info(f"-Complete download compose! File: {rel_path}")
     return
 
 
