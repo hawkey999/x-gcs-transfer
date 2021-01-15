@@ -81,8 +81,7 @@ def upload_func(blob, chunkdata, rel_path, file_progress):
     timespent = int((time.time() - timestart) * 1000) / 1000
     pload_bytes = len(chunkdata)
     speed = size_to_str(int(pload_bytes / timespent)) + "/s"
-    logger.info(
-        f"-Upload Chunk:{rel_path} Time:{timespent}s Speed:{speed} FileProgress:{file_progress}%")
+    logger.info(f"-Upload Chunk:{rel_path} Time:{timespent}s Speed:{speed} FileProgress:{file_progress}%")
     return
 
 
@@ -223,7 +222,7 @@ def list_bucket(prefix, only_list_file=False):
         for blob in page:
             absPath = blob.name
             size = blob.size
-            if prefix != ".":
+            if prefix != "." and prefix != absPath:
                 relPath = absPath[len(prefix) + 1:]
             else:
                 relPath = absPath

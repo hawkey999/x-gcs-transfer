@@ -3,8 +3,19 @@ Google Cloud Storage Upload/Download, fully usage of network bandwidth, suitable
 谷歌云存储GCS大文件上传下载，充分利用网络带宽，适合大文件或恶劣网络传输场景。  
 
 Performance 性能测试:  
-* 
+* **Single 100GB Big File 单个大文件100GB**  
+**Upload 720MB/s SUSTAINABLE HIGH SPEED** (Read from Local SSD) as below graph. In similar test download 120MB/s(Write Local SSD).   
+上传达到了 **720MBytes/s** 稳定速度，达到了Local SSD读取速度的瓶颈。类似的下载测试达到120MB/s。  
+Running on GCE N2-8cpu with one Local SSD 375G. This speed has reach the cap speed limitation of one Local SSD.   
+![x-gcs-LocalSSD-upload.png](./img/x-gcs-LocalSSD-upload.png)
+  
+* As compare, here is the speed of running with gsutil command tool with compose upload feature enabled. **Speed only burst to 100MB/s for 3 minutes and then average lower than 15M/s**. This is because it keep the same TCP connection for long time, and GCS Network cap the TCP speed.   
+![gsutil-slow.png](./img/gsutil-slow.png)
+  
+* As compare, here is the spped of Transfer Service On-premises. Speed only **average 40MB/s**
+![Transfer-service-slow-for-big-file](./img/Transfer-service-slow-for-big-file.png)
 
+* Under poor performance of Network, e.g. packet lost 20% or even 50%, this tool can still upload/download with sustainable high speed.  
 
 ## How to Run
 1. Authentication (Choose one of these three)  认证（三选一）
@@ -153,3 +164,8 @@ sudo systemctl reload nginx
 sudo systemctl status nginx
 netstat -ntulp |grep 443
 ```
+
+* Under poor performance of Network, packet lost as 20% or even 50%, this tool can still upload/download with sustainable high speed.  
+在中国大陆跨境网络比较恶劣的情况下，丢包率达到20%甚至50%，对于200Mbps的普通宽带，可以实现较为持续的高速度。
+![x-gcs-net-packet-lost-23.png](./img/x-gcs-net-packet-lost-23.png)
+![x-gcs-net-packet-lost-53.png](./img/x-gcs-net-packet-lost-53.png)
