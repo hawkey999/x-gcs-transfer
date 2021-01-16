@@ -113,8 +113,8 @@ Optional: prefix in the the GCS bucket.
 Default: "/"  
 
 --single_file  
-Option: download/upload a directory of just a single file.  
-Default: False (i.e. directory)
+Option: download/upload a directory(False) or just a single file(True).  
+Default: False 
 
 --temp_prefix  
 Optional. the temp prefix in the bucket for temp chunk files, temp files will be delete after upload and compose complete.  
