@@ -112,8 +112,8 @@ Required: GCS bucket name
 Optional: prefix in the the GCS bucket.  
 Default: "/"  
 
---single_file
-Option: download/upload a directory of just a single file. 
+--single_file  
+Option: download/upload a directory of just a single file.  
 Default: False (i.e. directory)
 
 --temp_prefix  
