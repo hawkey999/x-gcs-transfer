@@ -9,13 +9,16 @@ Google Cloud Storage Upload/Download, fully usage of network bandwidth, suitable
 Running on GCE N2-8cpu with one Local SSD 375G. This speed has reach the cap speed limitation of one Local SSD.   
 ![x-gcs-LocalSSD-upload.png](./img/x-gcs-LocalSSD-upload.png)
   
-* As compare, here is the speed of running with gsutil command tool with compose upload feature enabled. **Speed only burst to 100MB/s for 3 minutes and then average lower than 15M/s**. This is because it keep the same TCP connection for long time, and GCS Network cap the TCP speed.   
+* As compare, here is the speed of running with gsutil command tool with compose upload feature enabled. **Speed only burst to 100MB/s for 3 minutes and then average lower than 15MB/s**. This is because it keep the same TCP connection for long time, and GCS Network cap the TCP speed.   
+作为对比，以下是命令行工具 gsutil 达到的速度，15MB/s  
 ![gsutil-slow.png](./img/gsutil-slow.png)
   
-* As compare, here is the spped of Transfer Service On-premises. Speed only **average 40MB/s**
+* As compare, here is the spped of Transfer Service On-premises. Speed only **average 40MB/s**  
+作为对比，以下是 Transfer Service On-premises 服务达到的速度，40MB/s  
 ![Transfer-service-slow-for-big-file](./img/Transfer-service-slow-for-big-file.png)
 
-* Under poor performance of Network, e.g. packet lost 20% or even 50%, this tool can still upload/download with sustainable high speed.  
+* Under poor performance of Network, e.g. packet lost 20% or even 50%, this tool can still upload/download with sustainable high speed, with multi-threads and fast multi-retry.  
+在较差的网络情况下，例如丢包20%甚至50%的情况，利用多线程和快速多次重试，本工具仍可以达到较持续的高速度。  
 
 ## How to Run
 1. Authentication (Choose one of these three)  认证（三选一）
@@ -190,6 +193,10 @@ netstat -ntulp |grep 443
 ```
 
 * Under poor performance of Network, packet lost as 20% or even 50%, this tool can still upload/download with sustainable high speed.  
-在中国大陆跨境网络比较恶劣的情况下，丢包率达到20%甚至50%，对于200Mbps的普通宽带，可以实现较为持续的高速度。
+在中国大陆跨境网络比较恶劣的情况下，丢包率达到20%甚至50%，对于200Mbps的普通宽带，可以实现较为持续的高速度。  
 ![x-gcs-net-packet-lost-23.png](./img/x-gcs-net-packet-lost-23.png)
 ![x-gcs-net-packet-lost-53.png](./img/x-gcs-net-packet-lost-53.png)
+
+  
+----
+Author: Huang, Zhuobin (James)
