@@ -21,6 +21,7 @@ Running on GCE N2-8cpu with one Local SSD 375G. This speed has reach the cap spe
 在较差的网络情况下，例如丢包20%甚至50%的情况，利用多线程和快速多次重试，本工具仍可以达到较持续的高速度。  
 
 ## How to Run
+* Notice: Now this tool only support Linux/Mac. Will support windows in next release.
 1. Authentication (Choose one of these three)  认证（三选一）
  - Running on GCE(VM): Config IAM Service Account for GCE. GCE API access scope should have at least Storage and oauth API. You can allow all API access scope and only control auth by IAM.  
  如果运行在GCE虚拟机: 则配置IAM Service Account给GCE，并且GCE的访问API权限至少要有Storage和oauth两个API权限（可以全打开，只由IAM控制）
