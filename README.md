@@ -1,15 +1,15 @@
 # Accelerate GCS Upload/Download
-Google Cloud Storage Upload/Download Accelerate tool, fully usage of network bandwidth, suitable for BIG FILE or poor network senario.  
+Google Cloud Storage Upload/Download Accelerate tool, fully usage of network bandwidth, suitable for BIG FILE or poor network scenario.  
 谷歌云存储GCS**大文件**上传下载加速，充分利用网络带宽，适合大文件或恶劣网络传输场景。  
 
 ## Performance 性能测试:  
 * **Single 100GB Big File 单个大文件100GB**  
-**Upload 720MB/s SUSTAINABLE HIGH SPEED** (Read from Local SSD) as below graph. In similar test download 120MB/s(Write Local SSD).   
-上传达到了 **720MBytes/s** 稳定速度，达到了Local SSD读取速度的瓶颈。类似的下载测试达到120MB/s。  
+**Upload 728MB/s SUSTAINABLE HIGH SPEED** (Read from Local SSD) as below graph. In similar test download 120MB/s(Write Local SSD).   
+上传达到了 **728MBytes/s** 稳定速度，达到了Local SSD读取速度的瓶颈。类似的下载测试达到120MB/s。  
 Running on GCE N2-8cpu with one Local SSD 375G. This speed has reach the cap speed limitation of one Local SSD.   
 ![x-gcs-LocalSSD-upload.png](./img/x-gcs-LocalSSD-upload.png)
   
-* As compare, here is the speed of running with gsutil command tool with compose upload feature enabled. **Speed only burst to 100MB/s for 3 minutes and then average lower than 15MB/s**. This is because it keep the same TCP connection for long time, and GCS Network cap the TCP speed.   
+* As compare, here is the speed of running with gsutil command tool with compose upload feature enabled. **Speed only burst to 100MB/s for 2 minutes and then average lower than 15MB/s**. This is because it keep the same TCP connection for long time, and GCS Network cap the TCP speed.   
 作为对比，以下是命令行工具 gsutil 达到的速度，15MB/s  
 ![gsutil-slow.png](./img/gsutil-slow.png)
   
@@ -18,7 +18,7 @@ Running on GCE N2-8cpu with one Local SSD 375G. This speed has reach the cap spe
 ![Transfer-service-slow-for-big-file](./img/Transfer-service-slow-for-big-file.png)
 
 * Under poor performance of Network, e.g. packet lost 20% or even 50%, this tool can still upload/download with sustainable high speed, with multi-threads and fast multi-retry.  
-在较差的网络情况下，例如丢包20%甚至50%的情况，利用多线程和快速多次重试，本工具仍可以达到较持续的高速度。  
+在较差的网络情况下，例如丢包20%甚至50%的情况，利用多线程和快速多次重试，本工具仍可以达到较持续的高速度。见本文最底下的测试截图。    
 
 ## How to Run
 * Notice: Now this tool only support Linux/Mac. Will support windows in next release.
