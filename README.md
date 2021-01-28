@@ -1,6 +1,6 @@
-# GCS Strong Upload/Download
-Google Cloud Storage Upload/Download, fully usage of network bandwidth, suitable for big file or poor network senario.  
-谷歌云存储GCS大文件上传下载，充分利用网络带宽，适合大文件或恶劣网络传输场景。  
+# Accelerate GCS Upload/Download
+Google Cloud Storage Upload/Download Accelerate tool, fully usage of network bandwidth, suitable for BIG FILE or poor network senario.  
+谷歌云存储GCS**大文件**上传下载加速，充分利用网络带宽，适合大文件或恶劣网络传输场景。  
 
 ## Performance 性能测试:  
 * **Single 100GB Big File 单个大文件100GB**  
@@ -198,6 +198,7 @@ netstat -ntulp |grep 443
 ![x-gcs-net-packet-lost-23.png](./img/x-gcs-net-packet-lost-23.png)
 ![x-gcs-net-packet-lost-53.png](./img/x-gcs-net-packet-lost-53.png)
 
-  
+* 在恶劣网络场景下，还可以启用服务器网络TCP BBR来进一步优化带宽。  
+
 ----
 Author: Huang, Zhuobin (James)
