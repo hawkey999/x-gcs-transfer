@@ -1,6 +1,7 @@
 # Accelerate GCS Upload/Download
 Google Cloud Storage Upload/Download Accelerate tool, fully usage of network bandwidth, suitable for BIG FILE or poor network scenario.  
-谷歌云存储GCS**大文件**上传下载加速，充分利用网络带宽，适合大文件或恶劣网络传输场景。  
+谷歌云存储GCS**大文件**上传下载加速，利用多线程、自动无限分片、短链接快速重试等技术，充分利用网络带宽，适合大文件或恶劣网络传输场景。  
+Support Linux, MacOS, Windows environment with Python3.7 or later version
 
 ## Performance 性能测试:  
 * **Single 100GB Big File 单个大文件100GB**  
@@ -21,7 +22,7 @@ Running on GCE N2-8cpu with one Local SSD 375G. This speed has reach the cap spe
 在较差的网络情况下，例如丢包20%甚至50%的情况，利用多线程和快速多次重试，本工具仍可以达到较持续的高速度。见本文最底下的测试截图。    
 
 ## How to Run
-* Notice: Now this tool only support Linux/Mac. Will support windows in next release.
+
 1. Authentication (Choose one of these three)  认证（三选一）
  - Running on GCE(VM): Config IAM Service Account for GCE. GCE API access scope should have at least Storage and oauth API. You can allow all API access scope and only control auth by IAM.  
  如果运行在GCE虚拟机: 则配置IAM Service Account给GCE，并且GCE的访问API权限至少要有Storage和oauth两个API权限（可以全打开，只由IAM控制）
@@ -49,7 +50,7 @@ pip3 install -r requirements.txt
 ```
 python3 x-gcs-transfer.py \
 --job_type download \
---local_dir "my/local/dir/" \
+--local_dir my/local/dir/ \
 --bucket my_gcs_bucket_name \
 ```
 
@@ -57,24 +58,24 @@ Example Download command 下载示例：
 ```
 python3 x-gcs-transfer.py \
 --job_type download \
---local_dir "/Users/hzb/Downloads/test_folder" \
+--local_dir /Users/hzb/Downloads/test_folder \
 --bucket lab-hzb-us-central1 \
---prefix "x-gcs-upload/"
+--prefix x-gcs-upload/
 ```
 Example Upload example command 上传示例：  
 ```
 python3 x-gcs-transfer.py \
 --job_type upload \
---local_dir "/Users/hzb/Downloads/test_folder" \
+--local_dir /Users/hzb/Downloads/test_folder \
 --bucket lab-hzb-us-central1 
 ```
-Example Download with custom concurrent and chunksize 下载并自定义并发数和Chunksize：  
+Example Download with custom concurrent and chunksize 上传并自定义并发数和Chunksize：  
 ```
 python3 x-gcs-transfer.py \
 --job_type upload \
---local_dir "/Users/hzb/Downloads/test_folder" \
+--local_dir /Users/hzb/Downloads/test_folder \
 --bucket lab-hzb-us-central1 \
---prefix "x-gcs-upload/" \
+--prefix x-gcs-upload/ \
 --max_concurrent_files 3 \
 --max_concurrent_threads_per_file 10 \
 --chunksize 20
@@ -83,18 +84,18 @@ Example Upload one file example command 上传单个文件示例：
 ```
 python3 x-gcs-transfer.py \
 --job_type upload \
---local_dir "/Users/hzb/Downloads/test_folder/sing.zip" \
+--local_dir /Users/hzb/Downloads/test_folder/sing.zip \
 --bucket lab-hzb-us-central1 \
---prefix "smfile" \
+--prefix smfile \
 --single_file true
 ```
 Example Download one file example command 下载单个文件示例：  
 ```
 python3 x-gcs-transfer.py \
 --job_type download \
---local_dir "/Users/hzb/Downloads/test_folder/" \
+--local_dir /Users/hzb/Downloads/test_folder/ \
 --bucket lab-hzb-us-central1 \
---prefix "smfile/sing.zip" \
+--prefix smfile/sing.zip \
 --single_file true
 ```
 

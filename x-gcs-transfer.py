@@ -25,18 +25,18 @@ parser.add_argument("--temp_prefix", type=str, default="x-gcs-temp")
 parser.add_argument("--max_concurrent_files", type=int, default=3)
 parser.add_argument("--max_concurrent_threads_per_file", type=int, default=5)
 parser.add_argument("--conn_timeout", type=int, default=5)
-parser.add_argument("--read_timeout", type=int, default=30)
+parser.add_argument("--read_timeout", type=int, default=60)
 parser.add_argument("--max_retry", type=int, default=300)
 parser.add_argument("--chunksize", type=int, default=5)
 
 args = parser.parse_args()
-bucket_name = args.bucket
+bucket_name = args.bucket  # TODO: verify input
 bucket_prefix = PurePosixPath(args.prefix)
 if args.prefix == "/" or args.prefix == ".":
     bucket_prefix = PurePosixPath("")
 single_file = args.single_file.lower() == "true"
 temp_path = bucket_prefix / args.temp_prefix
-local_dir = args.local_dir
+local_dir = args.local_dir  # TODO: handle dir name surfix with \"
 job_type = args.job_type.lower()
 MB = 1024*1024
 min_split_size = 10*MB  # If file size less than this, then use original google lib to upload
@@ -172,7 +172,7 @@ def upload_small(local_path, rel_path):
 
 
 def upload_file(upload_job):
-    rel_path = upload_job["File_relPath"]
+    rel_path = str(PurePosixPath(upload_job["File_relPath"]))
     if single_file:
         abs_path = local_dir
     else:
@@ -222,7 +222,7 @@ def list_local(path):
         for parent, dirnames, filenames in os.walk(path):
             for filename in filenames:
                 file_absPath = os.path.join(parent, filename)
-                file_relativePath = file_absPath[len(path) + 1:]
+                file_relativePath = file_absPath[len(path) + 1:].replace("\\", "/")
                 file_size = os.path.getsize(file_absPath)
                 file_list.append({
                     "File_relPath": file_relativePath,
@@ -298,7 +298,7 @@ def create_dir(file_dir):
     try:
         Path.mkdir(file_dir)
     except Exception as _e:
-        logger.error(f'Fail to mkdir {str(_e)}')
+        logger.info(f'Fail to mkdir {str(_e)}')
     return
 
 
